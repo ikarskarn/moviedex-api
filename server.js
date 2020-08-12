@@ -48,7 +48,7 @@ function handleGetMovies(req, res) {
         response = response.filter(movies =>
             Number(movies.avg_vote) >= num)
     }
-    res.send({response});
+    res.json({response});
 }
 
 app.get('/movies', handleGetMovies)
