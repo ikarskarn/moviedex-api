@@ -7,7 +7,8 @@ const moviesData = require('./movies-data-small.json')
 
 const app = express()
 
-app.use(morgan('dev'));
+const morganSetting = process.env.NODE_ENV === 'production' ? 'tiny' : 'common';
+app.use(morgan(morganSetting));
 app.use(helmet());
 app.use(cors());
 
@@ -32,7 +33,6 @@ app.get('/genres', handleGetGenre)
 
 function handleGetMovies(req, res) {
     let response = moviesData;
-    //genre, country or avg_vote
     if(req.query.genre) {
         response = response.filter(movies => 
             movies.genre.toLowerCase().includes(req.query.genre.toLowerCase())
@@ -53,11 +53,18 @@ function handleGetMovies(req, res) {
 
 app.get('/movies', handleGetMovies)
 
-const PORT = 8000
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+      response = { error: { message: 'server error' }}
+    } else {
+      response = { error }
+    }
+    res.status(500).json(response)
+  })
+
+const PORT = process.env.PORT || 8000
 
 app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`)
+  
 })
-
-//Users can search for Movies by genre, country or avg_vote
-//The endpoint is GET /movie
